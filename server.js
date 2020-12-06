@@ -2,13 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const POKEDEX = require('./pokedex.json');
+const helmet = require('helmet');
 const cors = require('cors');
+
 
 // console.log(process.env.API_TOKEN);
 
-const app = express();
-app.use(morgan('dev'));
-app.use(cors());
+const app = express()
+app.use(helmet())
+app.use(morgan('dev'))
+app.use(cors())
+
 
 const validTypes = [
     `Bug`,
