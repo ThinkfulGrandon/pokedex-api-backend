@@ -1,12 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
-const POKEDEX = require('./pokedex.json')
+const POKEDEX = require('./pokedex.json');
+const cors = require('cors');
 
-// console.log(process.env.API_TOKEN)
+// console.log(process.env.API_TOKEN);
 
 const app = express();
 app.use(morgan('dev'));
+app.use(cors());
 
 const validTypes = [
     `Bug`,
@@ -45,10 +47,25 @@ app.get('/types', handleGetTypes)
 
 
 function handleGetPokemon(req, res) {
-    res.send('Hello Pokemons')
-}
-app.get('/pokemon', handleGetPokemon)
+    const {name, type} = req.query
 
+    let mons;
+    if(!name && !type) {
+        res.send('search requires a "name=" or "type=" or both query')
+    }
+    if(name) {
+        mons = POKEDEX.pokemon.filter(mon => mon.name.toLowerCase().includes(name.toLowerCase()))
+    }
+    if(type){
+        if(validTypes.indexOf(type) === -1){
+            res.send('you need to select a valid type!')
+        }
+        mons = POKEDEX.pokemon.filter(mon=> (mon.type.indexOf(type) !== -1))
+    }
+    res.send(mons);
+}
+
+app.get('/pokemon', handleGetPokemon)
 
 const port = 8000;
 
