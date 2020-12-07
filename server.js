@@ -10,7 +10,8 @@ const cors = require('cors');
 
 const app = express()
 app.use(helmet())
-app.use(morgan('dev'))
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common'
+app.use(morgan(morganSetting))
 app.use(cors())
 
 
@@ -37,7 +38,6 @@ const validTypes = [
 app.use(function validateBearerToken(req, res, next) {
     const bearerToken = req.get('Authorization')
     const apiToken = process.env.API_TOKEN
-    console.log('validate bearer token mid')
     if(!bearerToken || bearerToken.split(" ")[1] !== apiToken) {
         return res.status(401).json({error: 'Unauthorized Request'})
     }
@@ -71,8 +71,18 @@ function handleGetPokemon(req, res) {
 
 app.get('/pokemon', handleGetPokemon)
 
-const port = 8000;
+app.use((error, req, res, next) => {
+    let response
+    if (process.env.NODE_ENV === 'production') {
+      response = { error: { message: 'server error' }}
+    } else {
+      response = { error }
+    }
+    res.status(500).json(response)
+})
+
+const PORT = process.env.PORT;
 
 app.listen(port, () => {
-    console.log(`Port started at port ${port}`)
+    // console.log(`Port started at port ${PORT}`)
 })
